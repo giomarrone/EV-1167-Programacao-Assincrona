@@ -132,6 +132,7 @@ ul {
   flex-direction: column;
   gap: 0.5rem;
   padding: 0;
+  align-items: center;
 }
 li button {
   padding: 0.5rem 1rem;
@@ -146,7 +147,8 @@ li button {
 li button:hover {
   border: 1px solid #42b983;
   box-shadow: 0px 0px 10px #42b983;
-
+  color: #42b983;
+  background-color: white;
 }
 
 a {
