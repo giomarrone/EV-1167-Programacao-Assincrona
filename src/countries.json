@@ -1,0 +1,10 @@
+{
+    "games": [
+        {
+            "id": 1,
+            "name": "Counter-Strike: Global Offensive",
+            "category": "FPS",
+            "release": "2012"
+        }
+    ]
+}
