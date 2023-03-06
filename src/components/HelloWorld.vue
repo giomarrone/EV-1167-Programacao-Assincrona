@@ -31,27 +31,58 @@
         v-model="ageRating"
         placeholder="Faixa etária (ex.: 16+)"
       />
-      <input type="text" v-model="rating" placeholder="Nota" />
+      <input type="text" v-model="rating" placeholder="Nota (0-10)" />
     </div>
-    <button class="send-btn" @click="postUser">Cadastrar</button>
-    <ul>
-      <li v-for="game in dataGames" :key="game.id">
-        <button>
-          {{ game.title }} ({{ game.developer }})
-        </button>
-      </li>
-    </ul>
+    <button class="send-btn" @click="validateForm">Cadastrar</button>
+    <div v-if="loading">
+      <p>Carregando jogos...</p>
+    </div>
+    <div v-else>
+      <ul>
+        <li v-for="game in dataGames" :key="game.id">
+          <button class="li-item">
+            {{ game.title }} ({{ game.developer }})
+            <div class="item-options">
+              <button v-bind="game" @click="openModal(game)" class="item-btn">
+                <font-awesome-icon icon="fa-solid fa-eye" />
+              </button>
+              <button @click="openPutModal(game)" class="item-btn">
+                <font-awesome-icon icon="fa-solid fa-pen-to-square" />
+              </button>
+              <button v-bind="game" @click="deleteGame(game)" class="item-btn">
+                <font-awesome-icon icon="fa-solid fa-trash-can" />
+              </button>
+            </div>
+          </button>
+        </li>
+      </ul>
+    </div>
+    <GameModal
+      id="modal"
+      :game="currentGame"
+      @closeModal="isModal = false"
+      v-show="isModal"
+    ></GameModal>
+    <PutModal
+      @closeModal="isPutModal = false"
+      :game="currentGame"
+      v-show="isPutModal"
+    ></PutModal>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import GameModal from "../views/Modal.vue";
+import PutModal from "../views/PutModal.vue";
+import GameServices from "../Services/gameServices";
 
 export default {
   name: "HelloWorld",
 
   data() {
     return {
+      loading: true,
       dataGames: [],
       title: "",
       releaseYear: "",
@@ -63,9 +94,38 @@ export default {
       platforms: "",
       ageRating: "",
       rating: "",
+      isModal: false,
+      isPutModal: false,
+      currentGame: "{}",
     };
   },
+
+  components: {
+    GameModal,
+    PutModal,
+  },
+
   methods: {
+    validateForm() {
+      if (
+        this.title.length == 0 ||
+        this.releaseYear.length == 0 ||
+        this.genre.length == 0 ||
+        this.developer.length == 0 ||
+        this.hasMultiplayer.length == 0 ||
+        this.protagonist.length == 0 ||
+        this.isCompetitive.length == 0 ||
+        this.platforms.length == 0 ||
+        this.ageRating.length == 0 ||
+        this.rating.length == 0
+      ) {
+        alert("Por favor, preencha todos os campos.");
+      } else if (this.rating > 10) {
+        alert("A nota máxima para o jogo deve ser 10");
+      } else {
+        this.postUser();
+      }
+    },
     postUser() {
       try {
         axios.post("http://localhost:8080/api/games", {
@@ -89,12 +149,33 @@ export default {
     },
     async getUsers() {
       try {
-        const response = await axios.get("http://localhost:8080/api/games");
+        const response = await GameServices.get();
         this.dataGames = response.data.games;
-        console.log(response);
-      } catch {
-        console.log("teste");
+        this.loading = false;
+      } catch (error) {
+        console.log(error);
       }
+    },
+    async deleteGame(game) {
+      try {
+        await GameServices.delete(game.id);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        console.log("fim");
+        this.getUsers();
+      }
+    },
+    openModal(game) {
+      this.currentGame = game;
+      this.isModal = true;
+    },
+    openPutModal(game) {
+      this.currentGame = game;
+      this.isPutModal = true;
+    },
+    closeModal() {
+      this.$emit("closeModal");
     },
   },
 
@@ -141,7 +222,7 @@ li button {
   border: 1px solid transparent;
   margin: 0;
   background-color: #eeeeee;
-  transition: .2s;
+  transition: 0.2s;
 }
 
 li button:hover {
@@ -169,7 +250,25 @@ a {
 .send-btn:hover {
   background-color: #80d3ae;
 }
+
+.item-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.item-btn {
+  width: fit-content;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  color: gray;
+}
 button {
   cursor: pointer;
+}
+
+.li-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>
