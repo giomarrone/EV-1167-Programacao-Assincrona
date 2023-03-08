@@ -46,7 +46,7 @@
               <button v-bind="game" @click="openModal(game)" class="item-btn">
                 <font-awesome-icon icon="fa-solid fa-eye" />
               </button>
-              <button @click="openPutModal(game)" class="item-btn">
+              <button class="item-btn">
                 <font-awesome-icon icon="fa-solid fa-pen-to-square" />
               </button>
               <button v-bind="game" @click="deleteGame(game)" class="item-btn">
@@ -63,18 +63,12 @@
       @closeModal="isModal = false"
       v-show="isModal"
     ></GameModal>
-    <PutModal
-      @closeModal="isPutModal = false"
-      :game="currentGame"
-      v-show="isPutModal"
-    ></PutModal>
   </div>
 </template>
 
 <script>
 import axios from "axios";
 import GameModal from "../views/Modal.vue";
-import PutModal from "../views/PutModal.vue";
 import GameServices from "../Services/gameServices";
 
 export default {
@@ -95,14 +89,12 @@ export default {
       ageRating: "",
       rating: "",
       isModal: false,
-      isPutModal: false,
       currentGame: "{}",
     };
   },
 
   components: {
     GameModal,
-    PutModal,
   },
 
   methods: {
@@ -140,6 +132,7 @@ export default {
           ageRating: this.ageRating,
           rating: this.rating,
         });
+        this.loading = true
         console.log("Jogo cadastrado com sucesso");
       } catch {
         console.log("deu ruim");
@@ -151,7 +144,7 @@ export default {
       try {
         const response = await GameServices.get();
         this.dataGames = response.data.games;
-        this.loading = false;
+        this.loading = false
       } catch (error) {
         console.log(error);
       }
@@ -169,10 +162,6 @@ export default {
     openModal(game) {
       this.currentGame = game;
       this.isModal = true;
-    },
-    openPutModal(game) {
-      this.currentGame = game;
-      this.isPutModal = true;
     },
     closeModal() {
       this.$emit("closeModal");
@@ -192,7 +181,6 @@ export default {
   flex-direction: column;
   width: 80%;
   margin: 0 auto;
-  align-items: center;
 }
 .inputs {
   display: flex;
@@ -210,10 +198,9 @@ h1 {
 ul {
   list-style: none;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0;
-  align-items: center;
 }
 li button {
   padding: 0.5rem 1rem;
